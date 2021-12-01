@@ -3,16 +3,18 @@ package com.org.queue;
 import java.util.Scanner;
 
 /**
+ * 数组复用
+ *
  * @author zz
  */
-public class ArrayQueueDemo {
+public class CircleArrayQueue {
     public static void main(String[] args) {
-        ArrayQueue arrayQueue = new ArrayQueue(3);
+        CircleArray arrayQueue = new CircleArray(4);
         //接收用户输入
         char key;
         Scanner scanner = new Scanner(System.in);
         boolean loop = true;
-        while (loop){
+        while (loop) {
             System.out.println("s(show):显示对列");
             System.out.println("e(exit):退出程序");
             System.out.println("a(add):添加数据到对列");
@@ -21,7 +23,7 @@ public class ArrayQueueDemo {
             System.out.println("请输入：");
             //接受一个字符
             key = scanner.next().charAt(0);
-            switch (key){
+            switch (key) {
                 case 's':
                     arrayQueue.showQueue();
                     break;
@@ -36,19 +38,19 @@ public class ArrayQueueDemo {
                     break;
                 case 'g':
                     try {
-                        System.out.printf("取出的数据是%d\n",arrayQueue.getQueue());
+                        System.out.printf("取出的数据是%d\n", arrayQueue.getQueue());
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
                     }
 
                     break;
-                 case 'h':
-                     try {
-                         System.out.printf("队列头数据是%d\n",arrayQueue.headQueue());
-                     } catch (Exception e) {
-                         System.out.println(e.getMessage());
-                     }
-                     break;
+                case 'h':
+                    try {
+                        System.out.printf("队列头数据是%d\n", arrayQueue.headQueue());
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                    break;
                 default:
                     System.out.println("请正确输入's'、'a'、'e'、'g'、'h'其中一个字符！");
             }
@@ -56,20 +58,17 @@ public class ArrayQueueDemo {
     }
 }
 
-/**
- * 使用数组模拟队列-编写一个ArrayQueue类
- */
-class ArrayQueue {
+class CircleArray {
     /**
      * 表示数组的最大容量
      */
     private final int maxSize;
     /**
-     * 队列头
+     * 队列头指向第一个元素初始值为0
      */
     private int front;
     /**
-     * 队列尾
+     * 队列尾指向队列最后一个元素初始值为0
      */
     private int rear;
     /**
@@ -78,77 +77,90 @@ class ArrayQueue {
     private final int[] arr;
 
 
-    /**
-     * 创建队列的构造器
-     */
-    public ArrayQueue(int arrMaxSize){
-        maxSize =arrMaxSize;
+    public CircleArray(int arrMaxSize) {
+        maxSize = arrMaxSize;
         arr = new int[maxSize];
-        //指向队列头部，指向队列头的前一个位置
-        front = -1;
+        //指向队列头部，指向队列头的第一个位置
+        front = 0;
         //指向队列尾部，指向队尾数据（即就是队列最后一个数据）
-        rear = -1;
+        rear = 0;
     }
 
     /**
-     * 判断队列是否满
+     * 断队列是否满判
      */
-
-    public boolean isFull(){
-        return rear == maxSize-1;
+    public boolean isFull() {
+        return (rear + 1) % maxSize == front;
     }
 
     /**
      * 判断队列是否为空
      */
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return rear == front;
     }
+
 
     /**
      * 添加数据
      */
-    public void addQueue(int n){
+    public void addQueue(int n) {
         //判断队列是否满
-        if (isFull()){
+        if (isFull()) {
             System.out.println("队列已满，不能再添加数据");
             return;
         }
+        //数据直接插入
+        arr[rear] = n;
         //让rear后移
-        rear++;
-        arr[rear]=n;
+        rear = (rear + 1) % maxSize;
     }
+
     /**
      * 数据出队列
      */
-    public int getQueue(){
-        if (isEmpty()){
+    public int getQueue() {
+        if (isEmpty()) {
             throw new RuntimeException("队列空，不能取数据");
         }
-        front++;
-        return arr[front];
+        //front是指向队列的第一个元素
+        int value = arr[front];
+        front = (front + 1) % maxSize;
+        return value;
     }
+
 
     /**
      * 显示所有队列
      */
-    public void showQueue(){
-        if (isEmpty()){
+    public void showQueue() {
+        if (isEmpty()) {
             System.out.println("队列为空，不能遍历");
             return;
         }
-        for (int i = 0; i < arr.length; i++) {
-            System.out.printf("arr[%d]=%d\n",i,arr[i]);
+
+        //从front开始遍历，遍历多少个元素
+        for (int i = front; i < front + size(); i++) {
+            System.out.printf("arr[%d]=%d\n", i % maxSize, arr[i % maxSize]);
         }
+    }
+
+    /**
+     * 求出当前队列有效数据个数；
+     */
+
+    public int size() {
+        return (rear + maxSize - front) % maxSize;
     }
 
     /**
      * 显示队列的头部
      */
-    public int headQueue(){
-        if (isEmpty()){
+    public int headQueue() {
+        if (isEmpty()) {
             throw new RuntimeException("队列空，不能取数据");
         }
-        return arr[front+1];
+        return arr[front];
     }
 }
+
